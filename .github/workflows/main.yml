@@ -1,0 +1,32 @@
+name: Build BiliParty Portable EXE
+
+on:
+  workflow_dispatch:   # 纯手动触发，在 Actions 页面点按钮
+  push:
+    branches: [ main ] # 或者每次推送代码自动烤，可以去掉这行若只要手动
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: 取出代码
+        uses: actions/checkout@v4
+
+      - name: 设定 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 安装依赖
+        run: npm install
+
+      - name: 烤制免安装 exe
+        run: npx electron-builder --win portable
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 自动处理可能需要的 GitHub API
+
+      - name: 上传产物（exe）
+        uses: actions/upload-artifact@v4
+        with:
+          name: BiliParty-Portable
+          path: dist/*.exe
